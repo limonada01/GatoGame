@@ -3,7 +3,7 @@ import logger from 'morgan';                    //importar logger de morgan para
 import {Server} from 'socket.io';               //importar Server socket.io (para crear server de websocket)
 import {createServer} from 'node:http';         //importo modulo de node para poder crear servidores http
 //import cors from 'cors';                        //importar middleware cors
-import {TableController} from './Controllers/tableController.js';
+import {GameController} from './Controllers/GameController.js';
 
 const port = process.env.PORT ?? 3001;          //usa la variable de entorno si está disponible, sino usa el definido
 
@@ -20,9 +20,7 @@ const io = new Server(serverHTTP,{
 app.use(logger('dev'));                         //usar el logger en modo dev en todas las solicitudes
  
 
-TableController.handleIO(io);                   //llamo al controlador de las conexiones
-
-//io.on('connection', )
+GameController.handleIO(io);                   //llamo al controlador de las conexiones
 
 
 

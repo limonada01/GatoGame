@@ -1,6 +1,6 @@
 
 
-export class TableController{
+export class GameController{
 
     static handleIO(io){
 
