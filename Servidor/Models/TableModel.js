@@ -8,11 +8,11 @@ export class TableModel{
     static counter = 0;                                 // lleva el conteo de los turnos - Maximos de turnos: 9; la partida puede terminar antes
     static isPlaying = false;                           // bandera para verificar si hay una partida en juego 
 
-    static move = (id,move) => {
+    static move = (id,row,col) => {
         if(!this.idPlayers.includes(id)){
             return console.log("error: invalid id");
         }
-        this.updateTable(id,move);
+        this.updateTable(id,row,col);
         if (counter >= 5 && this.checkWinner()){        // si se hicieron al menos 5 movimientos y hay un ganador   
             return console.log("User ",id," WIN! Congrats");
         }else if(counter === 9){                        // si se llega al final del juego y no hay ganador 
@@ -20,8 +20,8 @@ export class TableModel{
         }
     }
 
-    static updateTable = (id,move) => {                 // actualiza el tablero segun el movimiento de un juegador(id)
-        table[move.row][move.col] = id;                 // actualizo el movimiento del jugador id con su id en la posicion en la que juego
+    static updateTable = (id,row,col) => {                 // actualiza el tablero segun el movimiento de un juegador(id)
+        table[row][col] = id;                 // actualizo el movimiento del jugador id con su id en la posicion en la que juego
         this.updateCounter; 	                        // sumo uno al contador de jugadas
         return console.log("User: ",id," played raw: ", move.raw, "col: ",move.col);
     }
@@ -91,4 +91,3 @@ export class TableModel{
 
 
 
-// move = {raw: int, col: int} formato
