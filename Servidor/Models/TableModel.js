@@ -13,7 +13,10 @@ export class TableModel{
     }
 
     static getState = () => {                           // retorna el estado actual del juego, necesario para cuando se conecta un nuevo usuario
-        return this.state;                              // luego solo se actualiza según los movimientos de los jugadores en caso de una partida en curso
+        return {                                        // luego solo se actualiza según los movimientos de los jugadores en caso de una partida en curso
+            table: this.state.table,
+            isPlaying: this.state.isPlaying,
+        };                              
     }
 
     static move = (id,row,col) => {
@@ -106,10 +109,10 @@ export class TableModel{
     
     static startMatch = (idPlayer) => {
         if (this.state.isPlaying) return {response: 'match_in_progress'};       // se encuentra una partida en curso                
-            this.addPlayerReadyToPlay(idPlayer);                                // añado al jugador que intenta jugar
-        if(checkReadyToPlay()) return {response: 'wait_another_player'}         // falta un jugador para comenzar la partida
+        this.addPlayerReadyToPlay(idPlayer);                                    // añado al jugador que intenta jugar
+        if (!this.checkReadyToPlay()) return {response: 'wait_another_player'};  // falta un jugador para comenzar la partida
         // ready para comenzar la partida
-        changeTurn();                                                           // establecer primer turno
+        this.changeTurn();                                                      // establecer primer turno
         return {response: 'ok',
             turn: this.state.turn}                                              // retorna la id de quien tiene que realizar el proximo movimiento
     }
@@ -138,6 +141,16 @@ export class TableModel{
         this.state.tunr =   this.state.isPlaying[0];                       // cambio el turno al jugador 1
     }
     console.log('next turn: '+  this.state.turn);            
+    }
+
+    static playerDisconnected = (idPlayer) => {                            // cuando se desconecta un player que se encuentra en partida
+        for(let i = 0;i<this.state.idPlayers.length;i++){
+            if(this.state.idPlayers[i] === idPlayer){
+                this.state.idPlayers[i] = undefined;                       // lo saco del registro de jugadores jugando
+                console.log('user '+idPlayer+' playing or ready to play is disconnected');
+                break;
+            }
+        }
     }
 }
 

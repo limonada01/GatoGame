@@ -1,4 +1,4 @@
-import { TableModel } from "../Models/TableModel.js";
+import { TableModel } from "../Models/tableModel.js";
 
 export class GameController{
 
@@ -6,16 +6,18 @@ export class GameController{
 
         io.on('connection', (socket) => {                               // recibe una conexion de un cliente
             console.log('a new user connected! id: '+socket.id);
-
-            socket.emit('state', () => TableModel.getState);            // retorna el estado actual del juego a quien se acaba de conectar
             
+
+            socket.emit('state', TableModel.getState());                // retorna el estado actual del juego a quien se acaba de conectar
+            
+
             socket.on('play', () => {                                   // el usuario conectado presiona boton de jugar
-                response = TableModel.startMatch(socket.id);
+                let response = TableModel.startMatch(socket.id);
                 socket.emit('play-response', response);
             });  
 
             socket.on('move',(message) =>{
-                const {row,col} = message;
+                let {row,col} = message;
                 if(row >= 0 && row <=2 && col >= 0 && col <= 2){        // verifico que los parametros sean correctos
                     response = TableModel.move(socket.id,row,col);      // invoco a la funcion move para ejecutar el movimiento
                     io.emit('move-response', response);                 // emito para todos los usuarios el movimiento
@@ -24,6 +26,7 @@ export class GameController{
             
             socket.on('disconnect', () => {
                 console.log('user '+socket.id+' disconnected');
+                TableModel.playerDisconnected(socket.id);               // verifica si el jugador desonectado estaba jugando o estaba listo para jugar
             });
         });
         

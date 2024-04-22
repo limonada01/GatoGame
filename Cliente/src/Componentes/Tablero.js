@@ -18,9 +18,9 @@ const Cell = styled.div`
     width: 100px;
 `;
 
-const Tablero = (move) => {// move: representa la posicion de la jugada del contrincante
+const Tablero = () => {// move: representa la posicion de la jugada del contrincante
     
-    const marcar = (idPosition) =>{//recibo el className de la celda
+    const marcar = (row,col,idPosition) =>{//recibo el className de la celda
         let celda = document.querySelector('.'+idPosition);
         celda.innerHTML = 'X';
         console.log("click en "+idPosition)
@@ -29,19 +29,19 @@ const Tablero = (move) => {// move: representa la posicion de la jugada del cont
     return (
         <Tabla>
             <Row className="f1">{/*primera fila*/}
-                <Cell className="c00" onClick={() => marcar('c00')}></Cell>
-                <Cell className="c01" onClick={() => marcar('c01')}></Cell>
-                <Cell className="c02" onClick={() => marcar('c02')}></Cell>
+                <Cell className="c00" onClick={() => marcar(0,0,"c00")}></Cell>
+                <Cell className="c01" onClick={() => marcar(0,1,"c01")}></Cell>
+                <Cell className="c02" onClick={() => marcar(0,2,"c02")}></Cell>
             </Row>
             <Row className="f2">{/*segunda fila*/}
-                <Cell className="c10" onClick={() => marcar('c10')}></Cell>
-                <Cell className="c11" onClick={() => marcar('c11')}></Cell>
-                <Cell className="c12" onClick={() => marcar('c12')}></Cell>
+                <Cell className="c10" onClick={() => marcar(1,0,"c10")}></Cell>
+                <Cell className="c11" onClick={() => marcar(1,1,"c11")}></Cell>
+                <Cell className="c12" onClick={() => marcar(1,2,"c12")}></Cell>
             </Row>
             <Row className="f3">{/*tercera fila*/}
-                <Cell className="c20" onClick={() => marcar('c20')}></Cell>
-                <Cell className="c21" onClick={() => marcar('c21')}></Cell>
-                <Cell className="c22"onClick={() => marcar('c22')}></Cell>
+                <Cell className="c20" onClick={() => marcar(2,0,"c20")}></Cell>
+                <Cell className="c21" onClick={() => marcar(2,1,"c21")}></Cell>
+                <Cell className="c22" onClick={() => marcar(2,2,"c22")}></Cell>
             </Row>
         </Tabla>
      );
