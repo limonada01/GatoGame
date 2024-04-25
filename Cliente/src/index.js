@@ -8,7 +8,7 @@ import {socket} from './socket.js';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 //React.StrictMode me ejecuta 2 veces el componente
 root.render(
-  <React.StrictMode>
+  //<React.StrictMode>
     <App socket = {socket}/>
-  </React.StrictMode>
+  //</React.StrictMode>
 );

@@ -12,8 +12,14 @@ export class GameController{
             
 
             socket.on('play', () => {                                   // el usuario conectado presiona boton de jugar
-                let response = TableModel.startMatch(socket.id);
-                socket.emit('play-response', response);
+                let res = TableModel.startMatch(socket.id);
+                socket.emit('play-response', res);
+                const {response} = res;
+                if (response === 'ok'){                                 // si ya estan los jugadores para comenzar la partida
+                    const {isPlaying} = res;
+                    io.emit('partial-state',{newIsPlaying: isPlaying}); // envia el nuevo estado del juego (jugando)
+                }
+                
             });  
 
             socket.on('move',(message) =>{

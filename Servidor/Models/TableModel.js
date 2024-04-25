@@ -15,7 +15,7 @@ export class TableModel{
     static getState = () => {                           // retorna el estado actual del juego, necesario para cuando se conecta un nuevo usuario
         return {                                        // luego solo se actualiza según los movimientos de los jugadores en caso de una partida en curso
             table: this.state.table,
-            isPlaying: this.state.isPlaying,
+            isPlaying: this.state.isPlaying
         };                              
     }
 
@@ -59,7 +59,7 @@ export class TableModel{
             }
         }
         this.state.counter = 0;                                 // reseteo el contador de turnos
-        changeIsPlaying();                                      // cambio le estado de juego
+        this.changeIsPlaying();                                 // cambio le estado de juego
         this.state.idPlayers = new Array(2);                    // reseteo el arreglo de ids de jugadores listos para jugar
         this.state.turn = -1;                                   // reseteo la variable que almacena los turnos
         console.log("Table reseted!");            
@@ -110,11 +110,15 @@ export class TableModel{
     static startMatch = (idPlayer) => {
         if (this.state.isPlaying) return {response: 'match_in_progress'};       // se encuentra una partida en curso                
         this.addPlayerReadyToPlay(idPlayer);                                    // añado al jugador que intenta jugar
-        if (!this.checkReadyToPlay()) return {response: 'wait_another_player'};  // falta un jugador para comenzar la partida
+        if (!this.checkReadyToPlay()) return {response: 'wait_another_player'}; // falta un jugador para comenzar la partida
         // ready para comenzar la partida
+        this.changeIsPlaying();                                                 // cambiar el estado del juego a jugando (isPlaying = true)
         this.changeTurn();                                                      // establecer primer turno
-        return {response: 'ok',
-            turn: this.state.turn}                                              // retorna la id de quien tiene que realizar el proximo movimiento
+        return {
+            response: 'ok',
+            turn: this.state.turn,                                              // retorna la id de quien tiene que realizar el proximo movimiento
+            isPlaying: this.state.isPlaying                                     // retorna el nuevo estado del juego (jugando)
+        }                                                   
     }
 
     static changeIsPlaying = () => {
@@ -123,7 +127,7 @@ export class TableModel{
     }
 
     static checkReadyToPlay = () => {
-    return  this.state.idPlayers[0] !== undefined &&  this.state.idPlayers[1] !== undefined ? true : false; // retorna true si se puede jugar, falso en caso contrario
+        return  this.state.idPlayers[0] !== undefined &&  this.state.idPlayers[1] !== undefined ? true : false; // retorna true si se puede jugar, falso en caso contrario
     }
 
     static addPlayerReadyToPlay = (idPlayer) => {

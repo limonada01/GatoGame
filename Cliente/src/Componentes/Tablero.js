@@ -18,8 +18,10 @@ const Cell = styled.div`
     width: 100px;
 `;
 
-const Tablero = () => {// move: representa la posicion de la jugada del contrincante
+const Tablero = ({socket}) => {// move: representa la posicion de la jugada del contrincante
     
+    console.log('Tablero render');
+
     const marcar = (row,col,idPosition) =>{//recibo el className de la celda
         let celda = document.querySelector('.'+idPosition);
         celda.innerHTML = 'X';
