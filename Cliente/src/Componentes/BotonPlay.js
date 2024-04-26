@@ -62,7 +62,23 @@ const BotonPlay = ({socket,isPlaying}) => {
                 setTextContentAviso('Comenzando Partida...');
             }
         }
+
+        const handleResult = (res) => {
+            const {response} = res;
+            if(response === 'win'){
+                const {id} = res;
+                if(socket.id === id){
+                    setTextContentAviso('Tu GANAS!')
+                }else{
+                    setTextContentAviso('Tu PIERDES!')
+                }
+            }else{
+                setTextContentAviso('EMPATE!')
+            } 
+        };
+
         socket.on('play-response', handlePlayResponse);             // suscribo el manejador al evento
+        socket.on('result', handleResult);
         return () => {
             socket.off('play-response',handlePlayResponse);         // limpio la suscripcion del manejador al evento playresponse al desmontar el componente
         }                                       

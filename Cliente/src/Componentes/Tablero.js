@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useEffect} from "react";
 import styled from "styled-components";
 
 const Tabla = styled.div`
@@ -22,11 +22,26 @@ const Tablero = ({socket}) => {// move: representa la posicion de la jugada del 
     
     console.log('Tablero render');
 
-    const marcar = (row,col,idPosition) =>{//recibo el className de la celda
-        let celda = document.querySelector('.'+idPosition);
+    const marcar = (rowSelected,colSelected,idPosition) =>{                 //recibo el className de la celda
+        const celda = document.querySelector('.'+idPosition);
         celda.innerHTML = 'X';
-        console.log("click en "+idPosition)
+        console.log("click en "+idPosition); 
+        socket.emit('move',{row: rowSelected,col: colSelected});
     } 
+
+    useEffect(() => {
+        
+        const handleMove = (res) => {
+            const {response,row,col} = res;
+            const celda = document.querySelector('.c'+row+col);
+            celda.innerHTML = 'O';
+            console.log(`El rival juego en la posicion [${row}][${col}]`);
+        }
+
+        socket.on('move-response', handleMove);
+        
+    },[socket]);
+
 
     return (
         <Tabla>

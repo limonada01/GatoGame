@@ -25,8 +25,21 @@ export class GameController{
             socket.on('move',(message) =>{
                 let {row,col} = message;
                 if(row >= 0 && row <=2 && col >= 0 && col <= 2){        // verifico que los parametros sean correctos
-                    response = TableModel.move(socket.id,row,col);      // invoco a la funcion move para ejecutar el movimiento
-                    io.emit('move-response', response);                 // emito para todos los usuarios el movimiento
+                    const res = TableModel.move(socket.id,row,col);           // invoco a la funcion move para ejecutar el movimiento
+                    const {response} = res;
+                    socket.broadcast.emit('move-response', {row: row,col: col});   // emito para todos los usuarios el movimiento excepto al socket que inicio la conexion
+                    if(response === 'win' || response === 'draw'){      // si el juego termino
+                        if(response === 'win'){
+                            io.emit('result',{                          // envio la respuesta a TODOS
+                                response: response,
+                                id: socket.id                           // si hay una ganador, envio su id
+                            });     
+                        }else{
+                            io.emit('result',{response: response});     // envio la respuesta a TODOS
+                        }
+                        // enviar nuevo estado tras el reset (quiza con delay)
+                       
+                    }
                 }
             });
             

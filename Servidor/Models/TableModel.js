@@ -20,21 +20,21 @@ export class TableModel{
     }
 
     static move = (id,row,col) => {
-        if(!state.idPlayers.includes(id)){
+        if(!this.state.idPlayers.includes(id)){
             console.error("invalid id, id player recived is not playing");
             return {response: 'error'};
         }
-        updateTable(id,row,col);
-        if (this.state.counter >= 5 && checkWinner()){             // si se hicieron al menos 5 movimientos y hay un ganador   
+        this.updateTable(id,row,col);
+        if (this.state.counter >= 5 && this.checkWinner()){             // si se hicieron al menos 5 movimientos y hay un ganador   
             console.log("User "+id+" WIN! Congrats");
-            this.resetGame;                                        // reseteo el estado del juego
+            this.resetGame();                                        // reseteo el estado del juego
             return {response: 'win',
                     row: row,
                     col: col
                 }
         }else if(this.state.counter === 9){                        // si se llega al final del juego y no hay ganador 
             console.log("Draw!");
-            this.resetGame;                                        // reseteo el estado del juego
+            this.resetGame();                                        // reseteo el estado del juego
             return {response: 'draw',
                     row: row,
                     col: col
@@ -48,14 +48,14 @@ export class TableModel{
 
     static updateTable = (id,row,col) => {                      // actualiza el tablero segun el movimiento de un juegador(id)
         this.state.table[row][col] = id;                        // actualizo el movimiento del jugador id con su id en la posicion en la que juego
-        this.updateCounter; 	                                // sumo uno al contador de jugadas 
-        console.log("User: "+id+" played raw: "+ row+ "col: "+col);
+        this.updateCounter(); 	                                // sumo uno al contador de jugadas 
+        console.log("User: "+id+" played raw: "+ row+ " col: "+col);
     }
 
     static resetGame = () => {
-        for (let raw = 0; raw < this.state.table.length; raw++){
-            for(let col = 0; col < this.state.table[raw].length; col++){
-                table[raw][col] = -1;
+        for (let row = 0; row < this.state.table.length; row++){
+            for(let col = 0; col < this.state.table[row].length; col++){
+                this.state.table[row][col] = -1;
             }
         }
         this.state.counter = 0;                                 // reseteo el contador de turnos
@@ -104,6 +104,7 @@ export class TableModel{
     }
 
     static updateCounter = () => {
+        console.log('flag from update counter!');
         this.state.counter++;
     }
     
