@@ -23,12 +23,15 @@ const Cuerpo = styled.div`
 
 const Body = ({socket}) => {
   console.log('body render!');
+  
   const [state, setState] = useState({
-    table: [[-1, -1, -1],                         // tablero interno para gestionar el juego
+    table: [[-1, -1, -1],                         // tablero interno para cargar el estado inicial del juego (para espectadores)
             [-1, -1, -1],
             [-1, -1, -1]],
     isPlaying: false                              // si la partida esta activa o no
   });
+
+  const [turn,setTurn] = useState('');
 
   useEffect(() => {
     const handleStateUpdate = (newState) => {
@@ -48,10 +51,16 @@ const Body = ({socket}) => {
         isPlaying: newIsPlaying})
       );
     };
-    
+
+    const handleTurn = (res) => {
+      const {response} = res;
+      setTurn(response);
+    }
+
+    socket.on('turn',handleTurn);
     socket.on('state', handleStateUpdate);
     socket.on('partial-state', handlePartialStateUpdate);
-
+    
     return () => {
       // Limpiar las suscripciones cuando el componente se desmonte
       socket.off('state', handleStateUpdate);
@@ -60,10 +69,11 @@ const Body = ({socket}) => {
     
   },[socket]);    // La dependencia socket asegura que el efecto se ejecute cuando socket cambie
 
+
   return (
     <Cuerpo>
       <Tablero socket={socket} />
-      <BotonPlay socket={socket} isPlaying={state.isPlaying} />
+      <BotonPlay socket={socket} isPlaying={state.isPlaying} turn/>
     </Cuerpo>
   );
 }
