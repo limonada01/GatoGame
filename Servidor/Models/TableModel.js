@@ -1,15 +1,11 @@
 export class TableModel{                              
 
     static state = {
-        table: [
-            [-1,-1,-1],
-            [-1,-1,-1],
-            [-1,-1,-1]
-        ],
+        table: Array(9).fill(''),
         idPlayers: new Array(2),                        // guardo las ids de los jugadores que estan jugando o estan listo para jugar
         counter: 0,                                     // lleva el conteo de los turnos - Maximos de turnos: 9; la partida puede terminar antes
         isPlaying: false,                               // bandera para verificar si hay una partida en juego
-        turn: -1                                        // almacena el id del jugador del cual se espera el siguiente movimiento
+        turn: ''                                        // almacena el id del jugador del cual se espera el siguiente movimiento
     }
 
     static getState = () => {                           // retorna el estado actual del juego, necesario para cuando se conecta un nuevo usuario
@@ -19,45 +15,39 @@ export class TableModel{
         };                              
     }
 
-    static move = (id,row,col) => {
+    static move = (id,pos) => {
         if(!this.state.idPlayers.includes(id)){
             console.error("invalid id, id player recived is not playing");
             return {response: 'error'};
         }
-        this.updateTable(id,row,col);
-        if (this.state.counter >= 5 && this.checkWinner()){             // si se hicieron al menos 5 movimientos y hay un ganador   
+        this.updateTable(id,pos);
+        let msg = 'ok';
+        if (this.state.counter >= 5 && this.checkWinner()){          // si se hicieron al menos 5 movimientos y hay un ganador   
             console.log("User "+id+" WIN! Congrats");
             this.resetGame();                                        // reseteo el estado del juego
-            return {response: 'win',
-                    row: row,
-                    col: col
-                }
-        }else if(this.state.counter === 9){                        // si se llega al final del juego y no hay ganador 
+            msg = 'win';
+        }else if(this.state.counter === 9){                          // si se llega al final del juego y no hay ganador 
             console.log("Draw!");
             this.resetGame();                                        // reseteo el estado del juego
-            return {response: 'draw',
-                    row: row,
-                    col: col
-                };
+            msg = 'draw';
         }
-        return {response: 'ok',
-                row: row,
-                col: col
+        
+        this.changeTurn();                                           // cambio el turno
+        //console.log('tabla actual: '+this.state.table);
+        return {response: msg,
+                pos: pos,
+                turn: this.state.turn
             };
     }
 
-    static updateTable = (id,row,col) => {                      // actualiza el tablero segun el movimiento de un juegador(id)
-        this.state.table[row][col] = id;                        // actualizo el movimiento del jugador id con su id en la posicion en la que juego
+    static updateTable = (id,pos) => {                          // actualiza el tablero segun el movimiento de un juegador(id)
+        this.state.table[pos] = id;                             // actualizo el movimiento del jugador id con su id en la posicion en la que juego
         this.updateCounter(); 	                                // sumo uno al contador de jugadas 
-        console.log("User: "+id+" played raw: "+ row+ " col: "+col);
+        console.log("User: "+id+" played pos: "+ pos);
     }
 
     static resetGame = () => {
-        for (let row = 0; row < this.state.table.length; row++){
-            for(let col = 0; col < this.state.table[row].length; col++){
-                this.state.table[row][col] = -1;
-            }
-        }
+        this.state.table = Array(9).fill('');
         this.state.counter = 0;                                 // reseteo el contador de turnos
         this.changeIsPlaying();                                 // cambio le estado de juego
         this.state.idPlayers = new Array(2);                    // reseteo el arreglo de ids de jugadores listos para jugar
@@ -68,22 +58,22 @@ export class TableModel{
 
     static checkWinner = () => {
         // Verificar filas
-        for (let row = 0; row < this.state.table.length; row++) {
+        for (let i = 0; i < 9; i+=3) {
             if (
-            this.state.table[row][0] !== -1 &&
-            this.state.table[row][0] === this.state.table[row][1] &&
-            this.state.table[row][1] === this.state.table[row][2]
+            this.state.table[i] !== '' &&
+            this.state.table[i] === this.state.table[i+1] &&
+            this.state.table[i+1] === this.state.table[i+2]
             ) {
             return true;                                    // retorna true si hay ganador
             }
         }
 
         // Verificar columnas
-        for (let col = 0; col < this.state.table[0].length; col++) {
+        for (let i = 0; i < 3; i++) {
             if (
-            this.state.table[0][col] !== -1 &&
-            this.state.table[0][col] === this.state.table[1][col] &&
-            this.state.table[1][col] === this.state.table[2][col]
+            this.state.table[i] !== '' &&
+            this.state.table[i] === this.state.table[i+3] &&
+            this.state.table[i+3] === this.state.table[i+6]
             ) {
             return true;                                    // retorna true si hay ganador
             }
@@ -91,12 +81,12 @@ export class TableModel{
 
         // Verificar diagonales
         if (
-            (this.state.table[0][0] !== -1 &&
-            this.state.table[0][0] === this.state.table[1][1] &&
-            this.state.table[1][1] === this.state.table[2][2]) ||
-            (this.state.table[0][2] !== -1 &&
-            this.state.table[0][2] === this.state.table[1][1] &&
-            this.state.table[1][1] === this.state.table[2][0])
+            (this.state.table[0] !== '' &&
+            this.state.table[0] === this.state.table[4] &&
+            this.state.table[4] === this.state.table[8]) ||
+            (this.state.table[2] !== '' &&
+            this.state.table[2] === this.state.table[4] &&
+            this.state.table[4] === this.state.table[6])
         ) {
             return true;                                    // retorna true si hay ganador
         }
@@ -104,7 +94,7 @@ export class TableModel{
     }
 
     static updateCounter = () => {
-        console.log('flag from update counter!');
+        //console.log('flag from update counter!');
         this.state.counter++;
     }
     
@@ -118,17 +108,18 @@ export class TableModel{
         return {
             response: 'ok',
             turn: this.state.turn,                                              // retorna la id de quien tiene que realizar el proximo movimiento
-            isPlaying: this.state.isPlaying                                     // retorna el nuevo estado del juego (jugando)
+            isPlaying: this.state.isPlaying,                                     // retorna el nuevo estado del juego (jugando)
+            playersIDs: this.state.idPlayers
         }                                                   
     }
 
     static changeIsPlaying = () => {
         this.state.isPlaying =  !this.state.isPlaying;
-        console.log("isPlaying: "+ this.state.isPlaying);
+        //console.log("isPlaying: "+ this.state.isPlaying);
     }
 
     static checkReadyToPlay = () => {
-        return  this.state.idPlayers[0] !== undefined &&  this.state.idPlayers[1] !== undefined ? true : false; // retorna true si se puede jugar, falso en caso contrario
+        return  this.state.idPlayers[0] !== undefined &&  this.state.idPlayers[1] !== undefined; // retorna true si se puede jugar, falso en caso contrario
     }
 
     static addPlayerReadyToPlay = (idPlayer) => {
@@ -137,13 +128,13 @@ export class TableModel{
     }
 
     static changeTurn = () => {                                            // cambiar turno del jugador que debe mover
-    if (this.state.turn === -1){
-        this.state.turn =   this.state.isPlaying[0];                       // asigno la id del jugador que primero dio a play para que comience a mover
-        console.log('fist turn');
-    }else if (this.state.turn ===    this.state.isPlaying[0]){             // si el turno actual es del jugador 1
-            this.state.turn =   this.state.isPlaying[1];                   // cambio el turno al jugador 2
+    if (this.state.turn === ''){
+        this.state.turn =   this.state.idPlayers[0];                       // asigno la id del jugador que primero dio a play para que comience a mover
+        //console.log('jugadores: '+this.state.idPlayers)
+    }else if (this.state.turn ===    this.state.idPlayers[0]){             // si el turno actual es del jugador 1
+            this.state.turn =   this.state.idPlayers[1];                   // cambio el turno al jugador 2
     }else{
-        this.state.tunr =   this.state.isPlaying[0];                       // cambio el turno al jugador 1
+        this.state.turn =   this.state.idPlayers[0];                       // cambio el turno al jugador 1
     }
     console.log('next turn: '+  this.state.turn);            
     }

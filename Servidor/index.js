@@ -1,5 +1,5 @@
 import express from 'express';                  // importar express
-import logger from 'morgan';                    // importar logger de morgan para monitorear peticiones http (quitar al subir a produccion?)
+//import logger from 'morgan';                    // importar logger de morgan para monitorear peticiones http (quitar al subir a produccion?)
 import {Server} from 'socket.io';               // importar Server socket.io (para crear server de websocket)
 import {createServer} from 'node:http';         // importo modulo de node para poder crear servidores http
 //import cors from 'cors';                        //importar middleware cors
@@ -17,7 +17,7 @@ const io = new Server(serverHTTP,{
 });                                             // habilito el websocket en el servidor http creado 
                                                 // ahora tenemos todas las funcionalidades en el mismo server
 //app.use(cors());                              // usar middleware cors en cada conexion para permitir todos los origenes, en produccion VERIFICAR! 
-app.use(logger('dev'));                         // usar el logger en modo dev en todas las solicitudes
+//app.use(logger('dev'));                         // usar el logger en modo dev en todas las solicitudes
  
 
 GameController.handleIO(io);                   // llamo al controlador de las conexiones
