@@ -1,7 +1,7 @@
 //import './App.css';
 import React,{useEffect} from "react";
-import Header from './Componentes/Header.js';
-import Body from './Componentes/Body.js';
+import Header from './Components/Header.js';
+import Game from './Components/Game.js';
 import styled from 'styled-components';
 
 
@@ -29,7 +29,7 @@ const App = ({socket}) => {
   return (
     <Contenedor>
       <Header/>
-      <Body socket = {socket} />
+      <Game socket = {socket} />
     </Contenedor>
   ); 
 }
