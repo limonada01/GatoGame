@@ -8,11 +8,21 @@ export class TableModel{
         turn: ''                                        // almacena el id del jugador del cual se espera el siguiente movimiento
     }
 
-    static getState = () => {                           // retorna el estado actual del juego, necesario para cuando se conecta un nuevo usuario
-        return {                                        // luego solo se actualiza según los movimientos de los jugadores en caso de una partida en curso
-            table: this.state.table,
+    static getState = () => {                           
+        // retorna el estado actual del juego, necesario para cuando se conecta un nuevo usuario
+        // luego solo se actualiza según los movimientos de los jugadores en caso de una partida en curso
+        let res = {
             isPlaying: this.state.isPlaying
-        };                              
+        }
+        if(this.state.isPlaying){               // si hay una partida en curso envio el tablero y los ids de los jugadores
+            res = {
+                ...res,
+                table: this.state.table,
+                idPlayers: this.state.idPlayers,
+                currentTurn: this.state.turn
+            }
+        }
+        return res;                              
     }
 
     static move = (id,pos) => {
@@ -140,13 +150,19 @@ export class TableModel{
     }
 
     static playerDisconnected = (idPlayer) => {                            // cuando se desconecta un player que se encuentra en partida
-        for(let i = 0;i<this.state.idPlayers.length;i++){
+        let res = {response: false};
+        for(let i = 0; i < this.state.idPlayers.length;i++){
             if(this.state.idPlayers[i] === idPlayer){
                 this.state.idPlayers[i] = undefined;                       // lo saco del registro de jugadores jugando
+                if(this.state.isPlaying){                                  // si se desconecto un jugador que se encontraba jugando
+                    res = {response: true}                                 // suspender la partida
+                    this.resetGame();                                      // reinicio el estado del juego     
+                }
                 console.log('user '+idPlayer+' playing or ready to play is disconnected');
                 break;
             }
         }
+        return res;
     }
 }
 

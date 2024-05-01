@@ -15,22 +15,14 @@ const Table = styled.div`
 
 
 
-const Board = ({socket,boardState,turn,updateBoard}) => {
-
-    // const marcar = (rowSelected,colSelected,idPosition) =>{                 //recibo el className de la celda
-    //     const celda = document.querySelector('.'+idPosition);
-    //     celda.innerHTML = '❌';
-    //     console.log("click en "+idPosition); 
-    //     socket.emit('move',{row: rowSelected,col: colSelected});
-    // }
-    
+const Board = ({socket,boardState,turn,isPlayingState}) => {   
     
     return ( 
         <Table>
             {
                 boardState.map((_,index) => {
                     return(
-                        <Square key={index} index={index} value={boardState[index]} socket={socket} turn={turn} />
+                        <Square key={index} index={index} value={boardState[index]} socket={socket} turn={turn} isPlayingState={isPlayingState} />
                     )
                 })
             }

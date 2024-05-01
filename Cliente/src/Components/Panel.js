@@ -29,12 +29,12 @@ const Boton = styled.button`
 
 const Aviso = styled.span`
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-    font-size: large;
+    font-size: 40px;
     color: white;
 `;
 
 
-const Panel = ({socket,showButtonPlay,showButtonReset,handleReset,textContentAlert}) => {
+const Panel = ({socket,showButtonPlay,showButtonReset,handleClickReset,textContentAlert}) => {
 
     const handleClickPlay = () => {
         socket.emit('play'); 
@@ -43,7 +43,7 @@ const Panel = ({socket,showButtonPlay,showButtonReset,handleReset,textContentAle
     return ( 
         <Contenedor>
             {showButtonPlay ? <Boton onClick={handleClickPlay}>PLAY</Boton> : <Aviso>{textContentAlert}</Aviso> }
-            {showButtonReset && <Boton onClick={handleReset}>Reiniciar</Boton> }
+            {showButtonReset && <Boton onClick={handleClickReset}>Reiniciar</Boton> }
         </Contenedor>  
     )
 }

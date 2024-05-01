@@ -11,16 +11,16 @@ const Cell = styled.div`
     box-sizing: border-box;
 `;
 
-const Square = ({index,value,socket,turn}) => {
+const Square = ({index,value,socket,turn,isPlayingState}) => {
     
-    const handleClick = (pos,idPlayer,turnPlayer) => {
-        if(idPlayer === turnPlayer) {                     // si es mi turno de jugar
+    const handleClick = (pos,idPlayer,turnPlayer,isPlaying) => {
+        if(idPlayer === turnPlayer && isPlaying) {                     // si es mi turno de jugar
             socket.emit('move',{pos: pos});
         }
     }
 
     return (
-        <Cell onClick={() => handleClick(index,socket.id,turn)}>
+        <Cell onClick={() => handleClick(index,socket.id,turn,isPlayingState)}>
             {value}
         </Cell>        
     );

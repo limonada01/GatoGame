@@ -36,7 +36,8 @@ export class GameController{
             
             socket.on('disconnect', () => {
                 console.log('user '+socket.id+' disconnected');
-                TableModel.playerDisconnected(socket.id);               // verifica si el jugador desonectado estaba jugando o estaba listo para jugar
+                const res = TableModel.playerDisconnected(socket.id);               // verifica si el jugador desonectado estaba jugando o estaba listo para jugar
+                io.emit('suspend',res);
             });
         });
         

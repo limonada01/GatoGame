@@ -2,6 +2,7 @@ import React,{useState,useEffect} from "react";
 import styled from "styled-components";
 import Board from "./Board";
 import Panel from "./Panel";
+import confetti from "canvas-confetti";
 
 const Cuerpo = styled.div`
   display: grid;
@@ -42,12 +43,22 @@ const Game = ({socket}) => {
         setPlayersArray(Array(2).fill(''));
     }
 
+    const handleTableReceived = (table,idPlayers) => {
+        const newBoard = Array(9).fill('');
+        table.forEach((element,index) => {
+            if(element !== ''){
+                element === idPlayers[0] ? newBoard[index] = FIGURES.x : newBoard[index] = FIGURES.o;
+            }
+        });
+        return newBoard;
+    }
+
     useEffect(() => {
-        if(playersArray[0] !== ''){                                // cuando el arreglo de jugadores no este vacio
+        if(playersArray[0] !== '' && !isSpectatorState){           // cuando el arreglo de jugadores no este vacio (partida inciada) y no soy espectador
             if(playersArray[0] === socket.id){                     // quien dio play primero
                 setMyFigure(FIGURES.x);                            // juega con la x
                 setOponentFigure(FIGURES.o);
-            }else{
+            }else{                                                 
                 setMyFigure(FIGURES.o);                      
                 setOponentFigure(FIGURES.x);
             } 
@@ -55,30 +66,47 @@ const Game = ({socket}) => {
     },[socket,playersArray]);                                      // actualizo las figuras cuando cambia el arreglo de jugadores
 
     useEffect(() => {                                              // cambio el turno segun el servidor
-        let text;
-        turnIDState === socket.id ? text = 'Es mi Turno '+myFigure : text = 'Esperando rival '+oponentFigure;
-        setTextContentAlert(text);
-    },[socket,turnIDState,myFigure,oponentFigure]);
+        if(!isSpectatorState){                                     // si no soy espectador
+            let text;
+            turnIDState === socket.id ? text = 'Es mi Turno '+myFigure : text = 'Esperando rival '+oponentFigure;
+            setTextContentAlert(text);
+        }
+    },[socket,turnIDState,myFigure,oponentFigure,isSpectatorState]);
 
     useEffect(() => {
 
         const handleWinner = (idWinner,myID) => {
             let text = '';
-            idWinner === myID ? text = 'Felicitaciones \n Ganaste 😎' : text = 'Lo siento \n Perdiste 😢';
+            if(!isSpectatorState){                                  // si soy uno de los jugadores
+                if(idWinner === myID){                              // si soy el ganador
+                    text = 'Felicitaciones \n Ganaste 😎';
+                    Promise.resolve().then(async () => await confetti()); // ejecuta confeti en segundo plano
+                }else{                                              // si soy el perdefor
+                    text = 'Lo siento \n Perdiste 😢';
+                }
+            }else{                                                  // si soy espectador
+                idWinner === playersArray[0] ? text = `Ganan las ${FIGURES.x}` : text = `Ganan las ${FIGURES.o}`;
+            }
             setTextContentAlert(text);                              // actualizo el texto informativo
             setShowButtonReset(true);                               // muestro el boton de reiniciar
+            setIsPlayingState(false);                               
         }
     
         const handleDraw = () => {                                  
             setTextContentAlert('Empate 🙃');                       // actualizo el texto informativo
             setShowButtonReset(true);                               // muestro el boton de reiniciar
+            setIsPlayingState(false);
         }
         
         const updateBoard = (pos) => {
             if(boardState[pos] === ''){                                            // solo puedo clickear si esta vacio
                 setBoardState((prevBoard)=>{
                     const newBoard = [...prevBoard];                               // creo una copia del boardState previo
-                    turnIDState === socket.id ? newBoard[pos] = myFigure : newBoard[pos] = oponentFigure;
+                    if(!isSpectatorState){                                         // si soy un jugador 
+                        turnIDState === socket.id ? newBoard[pos] = myFigure : newBoard[pos] = oponentFigure;
+                    }else{                                                         // si soy espectador
+                        turnIDState === playersArray[0] ? newBoard[pos] = FIGURES.x : newBoard[pos] = FIGURES.o;
+                    }
                     return (newBoard)
                 })
             }
@@ -86,11 +114,15 @@ const Game = ({socket}) => {
 
         const handleInitialState = (stateReceived) => {
             console.log('new state recived from server '+stateReceived);
-            const {table,isPlaying} = stateReceived;
-            if(isPlaying){      // si se está jugando
-                // parseo a JSON para comprar los objetos de forma simple
+            const {isPlaying} = stateReceived;
+            if(isPlaying){                          // si se está jugando - soy espectador
+                const {table,idPlayers,currentTurn} = stateReceived;
                 setIsPlayingState(isPlaying);
-                setBoardState(table);   
+                setIsSpectatorState(true);
+                setPlayersArray(idPlayers);
+                const newBoard = handleTableReceived(table,idPlayers);
+                setBoardState(newBoard); 
+                setTurnIDState(currentTurn);
                 setShowButtonPlay(false);
                 setTextContentAlert('Partida en Curso. Espere a que termine para jugar!');
                 console.log('state updated!');
@@ -112,10 +144,11 @@ const Game = ({socket}) => {
                 if(!playersIDs.includes(socket.id)) {                      // si no soy uno de los jugadores (soy espectador)
                     setIsSpectatorState(true);                             // si no estoy a la espera de un rival, es porque recibi este mensaje siendo espectador
                     setTextContentAlert('Partida en Curso. Espere a que termine para jugar!');
-                }else{                                                     // si soy uno de los jugadores (no espectador)
-                    setPlayersArray(playersIDs);                           // guardo las ids de los jugadores                             
-                    setTurnIDState(turn);                                  // incializo el nuevo turno segun el servidor
                 }
+                // sea jugador o espectador seteo turno y jugadores
+                setPlayersArray(playersIDs);                               // guardo las ids de los jugadores                             
+                setTurnIDState(turn);                                      // incializo el nuevo turno segun el servidor
+                
                 
             }
         }
@@ -133,21 +166,31 @@ const Game = ({socket}) => {
             }
         }
 
+        const handleSuspendGame = (res) => {
+            const {response} = res;
+            if (response) {                                       // si hay que suspender la partida
+                !isSpectatorState ? setTextContentAlert('El oponente se ha desconectado') : setTextContentAlert('Un jugador se ha desconectado');
+                setShowButtonReset(true);                               // muestro el boton de reiniciar
+                setIsPlayingState(false);   
+            }
+        }
         
         socket.on('state', handleInitialState);
         socket.on('play-response', handlePlayResponse);
         socket.on('move-response', handleMoveResponse);
+        socket.on('suspend', handleSuspendGame);
         return () => {  
             // limpio la suscripcion del manejador a los eventos al desmontar el componente
             socket.off('state', handleInitialState);
-            socket.off('play-response',handlePlayResponse);         
+            socket.off('play-response', handlePlayResponse);         
             socket.off('move-response', handleMoveResponse);
+            socket.off('suspend', handleSuspendGame);
         } 
     },[socket,turnIDState,myFigure,oponentFigure,boardState,textContentAlert]);
 
     return ( 
         <Cuerpo>
-            <Board socket={socket} boardState={boardState} turn={turnIDState} />
+            <Board socket={socket} boardState={boardState} turn={turnIDState} isPlayingState={isPlayingState}/>
             <Panel socket={socket} showButtonPlay={showButtonPlay} showButtonReset={showButtonReset} handleClickReset={handleResetState} textContentAlert={textContentAlert} />
         </Cuerpo>
     );
