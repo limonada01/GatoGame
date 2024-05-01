@@ -6,6 +6,7 @@ import {createServer} from 'node:http';         // importo modulo de node para p
 import {GameController} from './Controllers/GameController.js';
 import { PORT,ORIGIN } from './config.js';
 
+
 const port = PORT;          // usa la variable de entorno si está disponible, sino usa el definido
 
 const app = express();                          // creamos instancia de aplicacion express 
@@ -23,11 +24,12 @@ const io = new Server(serverHTTP,{
 
 GameController.handleIO(io);                   // llamo al controlador de las conexiones
 
+//app.use(express.static(path.join(__dirname,'../Cliente/build')))        // Configuración para servir archivos estáticos del cliente
 
 
-app.get('/', (req,res)=>{                       // respuesta para la url raiz
-    //res.sendFile(process.cwd()+'./../Cliente/public/index.html'); // Servir la pagina cliente al ingresar a la url raiz
-    res.send("path: "+process.cwd())
+app.get('*', (req,res)=>{                       // respuesta para la url raiz
+    //res.sendFile(path.join(__dirname,'../cliente/build,index.html')); // Servir la pagina cliente al ingresar a la url raiz
+    res.send('server live!')
 })
 
 serverHTTP.listen(port, () => {                          // inicia el socket y queda a la escucha de peticiones por el puerto definido
