@@ -4,14 +4,15 @@ import {Server} from 'socket.io';               // importar Server socket.io (pa
 import {createServer} from 'node:http';         // importo modulo de node para poder crear servidores http
 //import cors from 'cors';                        //importar middleware cors
 import {GameController} from './Controllers/GameController.js';
+import { PORT,ORIGIN } from './config.js';
 
-const port = process.env.PORT ?? 3001;          // usa la variable de entorno si está disponible, sino usa el definido
+const port = PORT;          // usa la variable de entorno si está disponible, sino usa el definido
 
 const app = express();                          // creamos instancia de aplicacion express 
 const serverHTTP = createServer(app);           // creamos servidor http con la instancia de express para unificar funcionalidades
 const io = new Server(serverHTTP,{
     cors: {
-      origin: "http://localhost:3000",
+      origin: ORIGIN,
       methods: ["GET", "POST"]
     }//cors, para poder responder a solicitudes del origen definido
 });                                             // habilito el websocket en el servidor http creado 
